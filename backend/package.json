@@ -1,0 +1,29 @@
+{
+  "name": "promptify-backend",
+  "version": "1.0.0",
+  "description": "Promptify Backend with OTel and SigNoz instrumentation",
+  "main": "server.js",
+  "scripts": {
+    "start": "node -r ./tracing.js server.js",
+    "dev": "node -r ./tracing.js server.js"
+  },
+  "dependencies": {
+    "@opentelemetry/api": "^1.9.0",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.57.2",
+    "@opentelemetry/instrumentation-express": "^0.47.0",
+    "@opentelemetry/instrumentation-http": "^0.57.2",
+    "@opentelemetry/resources": "^1.30.1",
+    "@opentelemetry/sdk-node": "^0.57.2",
+    "@opentelemetry/semantic-conventions": "^1.28.0",
+    "@xenova/transformers": "^2.17.2",
+    "bcryptjs": "^3.0.2",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "groq-sdk": "^0.15.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.12.1"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "promptify",
+  "version": "1.0.0",
+  "description": "Promptify — Self-Learning Prompt Optimization Layer instrumented with OpenTelemetry & SigNoz",
+  "scripts": {
+    "start:backend": "cd backend && npm start",
+    "start:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev"
+  },
+  "keywords": ["promptify", "opentelemetry", "signoz", "groq", "llm", "mongodb"],
+  "author": "",
+  "license": "ISC"
+}
