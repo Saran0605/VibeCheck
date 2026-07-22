@@ -1,235 +1,230 @@
-import React from 'react';
-import { X, Sparkles, Cpu, DollarSign, Clock, CheckCircle2, ArrowRight } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { X, Sparkles, Cpu, DollarSign, Clock, ArrowRight } from 'lucide-react';
+import { categoryBadgeClass, formatCost } from '../ui/helpers';
 
 export default function OptimizeModal({ isOpen, onClose, rawPrompt, category, suggestions, onSelectSuggestion }) {
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const onKey = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
-  // Calculate baseline metrics from first suggestion or defaults
   const baseSug = suggestions && suggestions.length > 0 ? suggestions[0] : null;
   const baseInputTokens = baseSug ? Math.round(baseSug.predictedTokensInput * 0.75) : 30;
   const baseOutputTokens = baseSug ? baseSug.predictedTokensOutput : 300;
-  const baseCostUsd = baseSug ? parseFloat((baseInputTokens * 0.0000001 + baseOutputTokens * 0.0000002).toFixed(6)) : 0.00006;
+  const baseCostUsd = baseSug
+    ? parseFloat((baseInputTokens * 0.0000001 + baseOutputTokens * 0.0000002).toFixed(6))
+    : 0.00006;
   const baseLatency = baseSug ? baseSug.predictedLatencyMs : 800;
 
   return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.75)',
-      backdropFilter: 'blur(6px)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 100,
-      padding: '1rem',
-    }}>
-      <div className="glass-panel animate-slide-up" style={{
-        width: '100%',
-        maxWidth: '720px',
-        maxHeight: '90vh',
-        borderRadius: '16px',
-        display: 'flex',
-        flexDirection: 'column',
-        boxShadow: '0 25px 50px rgba(0, 0, 0, 0.6)',
-        border: '1px solid var(--accent-purple)',
-        overflow: 'hidden',
-      }}>
-        {/* Header */}
-        <div style={{
-          padding: '1.25rem 1.5rem',
-          backgroundColor: 'var(--bg-secondary)',
-          borderBottom: '1px solid var(--border-color)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-            <div style={{
-              width: '32px',
-              height: '32px',
-              borderRadius: '8px',
-              background: 'var(--gradient-brand)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-              <Sparkles size={18} color="#ffffff" />
+    <div className="overlay overlay-center" onClick={onClose} role="presentation">
+      <div
+        className="modal-panel"
+        style={{ maxWidth: 680 }}
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="optimize-title"
+      >
+        <div
+          style={{
+            padding: '1.125rem 1.25rem',
+            borderBottom: '1px solid var(--border-subtle)',
+            display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'space-between',
+            gap: '1rem',
+            flexShrink: 0,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', minWidth: 0 }}>
+            <div
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: 8,
+                background: '#ffffff',
+                color: '#0b0b0b',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              <Sparkles size={16} aria-hidden />
             </div>
             <div>
-              <h2 style={{ fontSize: '1.15rem', fontWeight: 700 }}>VibeCheck Prompt Optimization</h2>
-              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                Select an optimized prompt below to inject into your workspace
+              <h2 id="optimize-title" style={{ fontSize: '1rem', fontWeight: 600, letterSpacing: '-0.02em' }}>
+                Optimize prompt
+              </h2>
+              <p className="ds-muted" style={{ fontSize: '0.8125rem', marginTop: 2 }}>
+                Choose a rewrite to inject into the editor
               </p>
             </div>
           </div>
-
-          <button
-            onClick={onClose}
-            style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
-          >
-            <X size={22} />
+          <button type="button" className="btn btn-ghost" onClick={onClose} aria-label="Close">
+            <X size={18} />
           </button>
         </div>
 
-        {/* Modal Body */}
-        <div style={{ padding: '1.5rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          
-          {/* TOP SECTION: Current Prompt & Baseline Stats */}
-          <div style={{
-            backgroundColor: 'var(--bg-panel)',
-            border: '1px solid var(--border-color)',
-            borderRadius: '12px',
-            padding: '1.25rem',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '0.85rem',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-dim)', letterSpacing: '0.05em' }}>
-                CURRENT RAW PROMPT & ANALYSIS
+        <div style={{ padding: '1.25rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <section className="ds-surface" style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem' }}>
+              <span className="ds-label" style={{ marginBottom: 0 }}>
+                Current prompt
               </span>
-
-              {category && (
-                <span style={{
-                  fontSize: '0.7rem',
-                  padding: '2px 8px',
-                  borderRadius: '4px',
-                  fontWeight: 700,
-                  textTransform: 'uppercase',
-                  backgroundColor: category === 'well-scoped' ? 'rgba(16, 185, 129, 0.15)' : category === 'underspecified' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(244, 63, 94, 0.15)',
-                  color: category === 'well-scoped' ? 'var(--accent-emerald)' : category === 'underspecified' ? 'var(--accent-amber)' : 'var(--accent-rose)',
-                  border: `1px solid ${category === 'well-scoped' ? 'rgba(16, 185, 129, 0.3)' : category === 'underspecified' ? 'rgba(245, 158, 11, 0.3)' : 'rgba(244, 63, 94, 0.3)'}`,
-                }}>
-                  {category}
-                </span>
-              )}
+              {category && <span className={categoryBadgeClass(category)}>{category}</span>}
             </div>
 
-            <p style={{
-              fontSize: '0.9rem',
-              color: 'var(--text-main)',
-              lineHeight: 1.5,
-              backgroundColor: '#0d121d',
-              padding: '0.85rem',
-              borderRadius: '8px',
-              border: '1px solid rgba(255,255,255,0.05)',
-              fontFamily: 'var(--font-sans)',
-            }}>
-              "{rawPrompt}"
+            <p
+              style={{
+                fontSize: '0.875rem',
+                color: 'var(--text-primary)',
+                lineHeight: 1.55,
+                background: 'var(--bg-base)',
+                padding: '0.875rem',
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border-subtle)',
+              }}
+            >
+              {rawPrompt}
             </p>
 
-            {/* Baseline Predicted Stats */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '1.25rem',
-              fontSize: '0.8rem',
-              color: 'var(--text-muted)',
-              paddingTop: '0.4rem',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                <Cpu size={14} color="var(--accent-purple)" />
-                <span>Tokens: ~{baseInputTokens + baseOutputTokens}</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '3px', color: 'var(--accent-emerald)' }}>
-                <DollarSign size={14} />
-                <span>Est. Cost: ${baseCostUsd}</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                <Clock size={14} color="var(--accent-amber)" />
-                <span>Est. Latency: {baseLatency}ms</span>
-              </div>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '1rem',
+                fontSize: '0.75rem',
+                color: 'var(--text-muted)',
+                flexWrap: 'wrap',
+              }}
+            >
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                <Cpu size={12} aria-hidden />~{baseInputTokens + baseOutputTokens} tokens
+              </span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 2 }}>
+                <DollarSign size={12} aria-hidden />
+                {formatCost(baseCostUsd)}
+              </span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                <Clock size={12} aria-hidden />~{baseLatency}ms
+              </span>
             </div>
-          </div>
+          </section>
 
-          {/* BOTTOM SECTION: 3 Optimized Prompt Options */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent-purple)', letterSpacing: '0.05em' }}>
-              3 OPTIMIZED PROMPTS (CLICK TO INJECT)
+          <section style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+            <span className="ds-label" style={{ marginBottom: 0 }}>
+              Suggestions
             </span>
 
             {(!suggestions || suggestions.length === 0) ? (
-              <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-dim)' }}>
-                Generating optimized variations...
+              <div style={{ padding: '2rem 1rem', textAlign: 'center' }}>
+                <div className="skeleton" style={{ height: 72, marginBottom: 8 }} />
+                <div className="skeleton" style={{ height: 72, marginBottom: 8 }} />
+                <div className="skeleton" style={{ height: 72 }} />
               </div>
             ) : (
               suggestions.map((sug, idx) => (
-                <div
+                <button
                   key={sug.id || idx}
+                  type="button"
                   onClick={() => onSelectSuggestion(sug)}
                   style={{
-                    backgroundColor: 'var(--bg-secondary)',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: '10px',
-                    padding: '1.1rem',
+                    background: 'var(--bg-surface)',
+                    border: '1px solid var(--border)',
+                    borderRadius: 'var(--radius-lg)',
+                    padding: '1rem',
                     cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    position: 'relative',
+                    textAlign: 'left',
+                    transition: 'border-color var(--transition), transform var(--transition), background-color var(--transition)',
+                    width: '100%',
+                    color: 'inherit',
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = 'var(--accent-blue)';
-                    e.currentTarget.style.backgroundColor = 'var(--bg-hover)';
+                    e.currentTarget.style.borderColor = '#525252';
                     e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.backgroundColor = 'var(--bg-hover)';
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = 'var(--border-color)';
-                    e.currentTarget.style.backgroundColor = 'var(--bg-secondary)';
+                    e.currentTarget.style.borderColor = 'var(--border)';
                     e.currentTarget.style.transform = 'none';
+                    e.currentTarget.style.backgroundColor = 'var(--bg-surface)';
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.6rem' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      marginBottom: '0.65rem',
+                      gap: '0.75rem',
+                      flexWrap: 'wrap',
+                    }}
+                  >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <span style={{
-                        width: '22px',
-                        height: '22px',
-                        borderRadius: '50%',
-                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
-                        color: 'var(--accent-blue)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '0.75rem',
-                        fontWeight: 700,
-                      }}>
+                      <span
+                        style={{
+                          width: 22,
+                          height: 22,
+                          borderRadius: 6,
+                          background: '#ffffff',
+                          color: '#0b0b0b',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '0.6875rem',
+                          fontWeight: 700,
+                        }}
+                      >
                         {idx + 1}
                       </span>
-                      <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--accent-blue)' }}>
-                        {sug.title}
-                      </span>
+                      <span style={{ fontSize: '0.8125rem', fontWeight: 600 }}>{sug.title}</span>
                     </div>
 
-                    {/* Stats Badges */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.72rem' }}>
-                      <span style={{ background: 'rgba(139, 92, 246, 0.15)', color: 'var(--accent-purple)', padding: '2px 8px', borderRadius: '4px', border: '1px solid rgba(139, 92, 246, 0.3)', fontWeight: 600 }}>
-                        ~{sug.predictedTokensInput + sug.predictedTokensOutput} tokens
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <span className="badge">
+                        ~{(sug.predictedTokensInput || 0) + (sug.predictedTokensOutput || 0)} tok
                       </span>
-                      <span style={{ background: 'rgba(16, 185, 129, 0.15)', color: 'var(--accent-emerald)', padding: '2px 8px', borderRadius: '4px', border: '1px solid rgba(16, 185, 129, 0.3)', fontWeight: 600 }}>
-                        ~${sug.predictedCostUsd}
-                      </span>
+                      <span className="badge">{formatCost(sug.predictedCostUsd)}</span>
                     </div>
                   </div>
 
-                  <p style={{
-                    fontSize: '0.85rem',
-                    color: 'var(--text-main)',
-                    lineHeight: 1.5,
-                    marginBottom: '0.5rem',
-                  }}>
+                  <p
+                    style={{
+                      fontSize: '0.8125rem',
+                      color: 'var(--text-secondary)',
+                      lineHeight: 1.55,
+                      marginBottom: '0.75rem',
+                    }}
+                  >
                     {sug.rewrittenPrompt}
                   </p>
 
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px', fontSize: '0.75rem', color: 'var(--accent-blue)', fontWeight: 600 }}>
-                    <span>Select this prompt</span>
-                    <ArrowRight size={14} />
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'flex-end',
+                      gap: 4,
+                      fontSize: '0.75rem',
+                      color: 'var(--text-primary)',
+                      fontWeight: 500,
+                    }}
+                  >
+                    Use this prompt
+                    <ArrowRight size={14} aria-hidden />
                   </div>
-                </div>
+                </button>
               ))
             )}
-          </div>
-
+          </section>
         </div>
       </div>
     </div>

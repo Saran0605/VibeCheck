@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Folder, FileCode, FileJson, ChevronDown, ChevronRight, HardDrive } from 'lucide-react';
+import { Folder, FileCode, FileJson, ChevronDown, ChevronRight } from 'lucide-react';
 
 const STATIC_FILES = [
   { name: 'index.js', type: 'js', icon: FileCode, size: '2.4 KB' },
@@ -7,102 +7,139 @@ const STATIC_FILES = [
   { name: 'config.json', type: 'json', icon: FileJson, size: '890 B' },
 ];
 
-export default function LeftPanel() {
+function ExplorerTree({ selectedFile, setSelectedFile, onSelect }) {
   const [isOpen, setIsOpen] = useState(true);
+
+  return (
+    <div style={{ padding: '0.5rem', flex: 1, overflowY: 'auto' }}>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.4rem',
+          width: '100%',
+          padding: '0.4rem 0.5rem',
+          borderRadius: 'var(--radius-sm)',
+          border: 'none',
+          background: 'transparent',
+          cursor: 'pointer',
+          fontSize: '0.8125rem',
+          fontWeight: 500,
+          color: 'var(--text-primary)',
+          textAlign: 'left',
+        }}
+      >
+        {isOpen ? <ChevronDown size={14} aria-hidden /> : <ChevronRight size={14} aria-hidden />}
+        <Folder size={14} color="var(--text-secondary)" aria-hidden />
+        <span>workspace</span>
+      </button>
+
+      {isOpen && (
+        <div style={{ marginLeft: '0.85rem', marginTop: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
+          {STATIC_FILES.map((file) => {
+            const IconComp = file.icon;
+            const isSelected = selectedFile === file.name;
+            return (
+              <button
+                key={file.name}
+                type="button"
+                onClick={() => {
+                  setSelectedFile(file.name);
+                  onSelect?.();
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '0.4rem 0.55rem',
+                  borderRadius: 'var(--radius-sm)',
+                  cursor: 'pointer',
+                  fontSize: '0.8125rem',
+                  border: 'none',
+                  width: '100%',
+                  textAlign: 'left',
+                  backgroundColor: isSelected ? 'var(--bg-active)' : 'transparent',
+                  color: isSelected ? 'var(--text-primary)' : 'var(--text-secondary)',
+                  transition: 'background-color var(--transition)',
+                }}
+              >
+                <span style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', minWidth: 0 }}>
+                  <IconComp size={14} color="var(--text-muted)" aria-hidden />
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {file.name}
+                  </span>
+                </span>
+                <span style={{ fontSize: '0.625rem', color: 'var(--text-muted)', flexShrink: 0 }}>{file.size}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function LeftPanel({ mobileOpen, onCloseMobile }) {
   const [selectedFile, setSelectedFile] = useState('index.js');
 
   return (
-    <aside style={{
-      width: '240px',
-      minWidth: '200px',
-      backgroundColor: 'var(--bg-panel)',
-      borderRight: '1px solid var(--border-color)',
-      display: 'flex',
-      flexDirection: 'column',
-      userSelect: 'none',
-    }}>
-      {/* Panel Header */}
-      <div style={{
-        padding: '0.75rem 1rem',
-        fontSize: '0.75rem',
-        fontWeight: 700,
-        color: 'var(--text-muted)',
-        letterSpacing: '0.05em',
-        borderBottom: '1px solid var(--border-color)',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '0.5rem',
-      }}>
-        <HardDrive size={14} color="var(--accent-blue)" />
-        <span>PROJECT EXPLORER</span>
-      </div>
-
-      {/* Explorer Tree */}
-      <div style={{ padding: '0.5rem', flex: 1, overflowY: 'auto' }}>
+    <>
+      <aside
+        className="sidebar-desktop"
+        style={{
+          width: 'var(--sidebar-width)',
+          minWidth: 'var(--sidebar-width)',
+          backgroundColor: 'var(--bg-elevated)',
+          borderRight: '1px solid var(--border-subtle)',
+          display: 'flex',
+          flexDirection: 'column',
+          userSelect: 'none',
+          height: '100%',
+        }}
+      >
+        <div className="panel-header">
+          <span className="panel-title">Explorer</span>
+        </div>
+        <ExplorerTree selectedFile={selectedFile} setSelectedFile={setSelectedFile} />
         <div
-          onClick={() => setIsOpen(!isOpen)}
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.4rem',
-            padding: '0.35rem 0.5rem',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            fontSize: '0.8rem',
-            fontWeight: 600,
-            color: 'var(--text-main)',
+            padding: '0.875rem 1rem',
+            borderTop: '1px solid var(--border-subtle)',
+            fontSize: '0.6875rem',
+            color: 'var(--text-muted)',
+            lineHeight: 1.45,
           }}
         >
-          {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-          <Folder size={14} color="var(--accent-amber)" />
-          <span>vibecheck-workspace</span>
+          Read-only context for prompt optimization.
         </div>
+      </aside>
 
-        {isOpen && (
-          <div style={{ marginLeft: '1.2rem', marginTop: '0.2rem', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-            {STATIC_FILES.map((file) => {
-              const IconComp = file.icon;
-              const isSelected = selectedFile === file.name;
-              return (
-                <div
-                  key={file.name}
-                  onClick={() => setSelectedFile(file.name)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '0.35rem 0.6rem',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: '0.8rem',
-                    backgroundColor: isSelected ? 'rgba(59, 130, 246, 0.15)' : 'transparent',
-                    color: isSelected ? '#ffffff' : 'var(--text-muted)',
-                    borderLeft: isSelected ? '2px solid var(--accent-blue)' : '2px solid transparent',
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <IconComp size={14} color={isSelected ? 'var(--accent-blue)' : 'var(--text-dim)'} />
-                    <span>{file.name}</span>
-                  </div>
-                  <span style={{ fontSize: '0.65rem', color: 'var(--text-dim)' }}>{file.size}</span>
-                </div>
-              );
-            })}
+      {mobileOpen && (
+        <div className="overlay overlay-end" style={{ zIndex: 80 }} onClick={onCloseMobile} role="presentation">
+          <div
+            className="drawer-panel"
+            style={{ maxWidth: 280 }}
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Project explorer"
+          >
+            <div className="panel-header">
+              <span className="panel-title">Explorer</span>
+              <button type="button" className="btn btn-ghost btn-sm" onClick={onCloseMobile}>
+                Close
+              </button>
+            </div>
+            <ExplorerTree
+              selectedFile={selectedFile}
+              setSelectedFile={setSelectedFile}
+              onSelect={onCloseMobile}
+            />
           </div>
-        )}
-      </div>
-
-      {/* Visual Context Info Footer */}
-      <div style={{
-        padding: '0.75rem',
-        borderTop: '1px solid var(--border-color)',
-        fontSize: '0.7rem',
-        color: 'var(--text-dim)',
-        backgroundColor: 'var(--bg-secondary)',
-      }}>
-        <div style={{ fontWeight: 600, color: 'var(--text-muted)', marginBottom: '2px' }}>Workspace Context</div>
-        Read-only project explorer for prompt optimization context.
-      </div>
-    </aside>
+        </div>
+      )}
+    </>
   );
 }

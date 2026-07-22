@@ -14,6 +14,7 @@ export default function App() {
   const [authChecking, setAuthChecking] = useState(true);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [optimizeModalOpen, setOptimizeModalOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Prompt state
   const [promptText, setPromptText] = useState('');
@@ -30,7 +31,6 @@ export default function App() {
   const [promptifyLoading, setPromptifyLoading] = useState(false);
   const [generateLoading, setGenerateLoading] = useState(false);
 
-  // Check auth session on startup
   useEffect(() => {
     fetchMe();
   }, []);
@@ -45,7 +45,7 @@ export default function App() {
       } else {
         setUser(null);
       }
-    } catch (e) {
+    } catch {
       setUser(null);
     } finally {
       setAuthChecking(false);
@@ -96,7 +96,6 @@ export default function App() {
     setHistoryList([]);
   };
 
-  // Open VibeCheck Optimization Modal
   const handleOpenOptimizeModal = async (inputPrompt) => {
     setRawPrompt(inputPrompt);
     setPromptifyLoading(true);
@@ -117,7 +116,7 @@ export default function App() {
       setPromptCategory(data.category);
       setSuggestions(data.suggestions || []);
       setOptimizeModalOpen(true);
-    } catch (err) {
+    } catch {
       alert('Network error calling VibeCheck optimizer endpoint');
     } finally {
       setPromptifyLoading(false);
@@ -130,7 +129,6 @@ export default function App() {
     setOptimizeModalOpen(false);
   };
 
-  // Submit Prompt
   const handleSubmitPrompt = async (promptToSubmit) => {
     setGenerateLoading(true);
     try {
@@ -165,14 +163,13 @@ export default function App() {
       });
 
       fetchHistory();
-    } catch (err) {
+    } catch {
       alert('Network error calling generate endpoint');
     } finally {
       setGenerateLoading(false);
     }
   };
 
-  // Feedback Toggle
   const handleFeedbackToggle = async (historyId, newSuccess) => {
     if (!historyId) return;
     try {
@@ -214,37 +211,62 @@ export default function App() {
 
   if (authChecking) {
     return (
-      <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
-        Loading VibeCheck...
+      <div
+        className="ds-page"
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexDirection: 'column',
+          gap: '1rem',
+        }}
+      >
+        <div
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: 8,
+            background: '#ffffff',
+            color: '#0b0b0b',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontWeight: 700,
+            fontSize: '0.75rem',
+            letterSpacing: '-0.04em',
+          }}
+        >
+          VC
+        </div>
+        <div className="skeleton" style={{ width: 120, height: 8 }} />
+        <span className="ds-dim" style={{ fontSize: '0.8125rem' }}>
+          Loading VibeCheck…
+        </span>
       </div>
     );
   }
 
-  // UPFRONT AUTH GATING
   if (!user) {
-    return (
-      <AuthScreen
-        onLogin={handleLogin}
-        onSignup={handleSignup}
-      />
-    );
+    return <AuthScreen onLogin={handleLogin} onSignup={handleSignup} />;
   }
 
   return (
-    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div className="app-shell">
       <Navbar
         user={user}
-        onOpenHistory={() => { fetchHistory(); setHistoryOpen(true); }}
+        onOpenHistory={() => {
+          fetchHistory();
+          setHistoryOpen(true);
+        }}
         onLogout={handleLogout}
+        onToggleSidebar={() => setSidebarOpen((v) => !v)}
       />
 
-      <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        <LeftPanel />
+      <div className="app-body">
+        <LeftPanel mobileOpen={sidebarOpen} onCloseMobile={() => setSidebarOpen(false)} />
 
-        <CenterPanel
-          currentOutput={currentOutput}
-          onFeedbackToggle={handleFeedbackToggle}
-        />
+        <CenterPanel currentOutput={currentOutput} onFeedbackToggle={handleFeedbackToggle} />
 
         <RightPanel
           promptText={promptText}
