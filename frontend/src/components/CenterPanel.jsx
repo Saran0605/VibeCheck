@@ -5,6 +5,7 @@ import 'prismjs/themes/prism-tomorrow.css';
 import 'prismjs/components/prism-javascript';
 import 'prismjs/components/prism-python';
 import 'prismjs/components/prism-json';
+import { categoryBadgeClass, formatCost } from '../ui/helpers';
 
 export default function CenterPanel({ currentOutput, onFeedbackToggle }) {
   const [copied, setCopied] = useState(false);
@@ -22,35 +23,56 @@ export default function CenterPanel({ currentOutput, onFeedbackToggle }) {
 
   if (!currentOutput) {
     return (
-      <main style={{
-        flex: 1,
-        backgroundColor: 'var(--bg-primary)',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '2rem',
-        color: 'var(--text-dim)',
-      }}>
-        <div style={{
-          width: '64px',
-          height: '64px',
-          borderRadius: '16px',
-          background: 'rgba(59, 130, 246, 0.1)',
-          border: '1px solid rgba(59, 130, 246, 0.2)',
+      <main
+        className="center-panel"
+        style={{
+          flex: 1,
+          backgroundColor: 'var(--bg-base)',
           display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          marginBottom: '1rem',
-        }}>
-          <Code2 size={32} color="var(--accent-blue)" />
+          padding: '2rem',
+          minWidth: 0,
+        }}
+      >
+        <div
+          className="animate-slide-up"
+          style={{
+            textAlign: 'center',
+            maxWidth: 380,
+          }}
+        >
+          <div
+            style={{
+              width: 48,
+              height: 48,
+              borderRadius: 12,
+              border: '1px solid var(--border)',
+              background: 'var(--bg-elevated)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 1.25rem',
+            }}
+          >
+            <Code2 size={22} color="var(--text-secondary)" aria-hidden />
+          </div>
+          <h2
+            style={{
+              color: 'var(--text-primary)',
+              fontSize: '1.125rem',
+              fontWeight: 600,
+              letterSpacing: '-0.02em',
+              marginBottom: '0.5rem',
+            }}
+          >
+            Ready to generate
+          </h2>
+          <p className="ds-muted" style={{ fontSize: '0.875rem', lineHeight: 1.55 }}>
+            Write a prompt in the editor, optimize it with VibeCheck, then submit to generate code with cost predictions.
+          </p>
         </div>
-        <h3 style={{ color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.4rem' }}>
-          Code Generator Ready
-        </h3>
-        <p style={{ fontSize: '0.85rem', maxWidth: '380px', textAlign: 'center', lineHeight: 1.5 }}>
-          Enter your prompt on the right panel or use <strong>Promptify</strong> to optimize your prompt before submitting.
-        </p>
       </main>
     );
   }
@@ -68,146 +90,135 @@ export default function CenterPanel({ currentOutput, onFeedbackToggle }) {
   } = currentOutput;
 
   return (
-    <main style={{
-      flex: 1,
-      backgroundColor: 'var(--bg-primary)',
-      display: 'flex',
-      flexDirection: 'column',
-      overflow: 'hidden',
-    }}>
-      {/* Code Viewer Header */}
-      <div style={{
-        padding: '0.6rem 1rem',
-        backgroundColor: 'var(--bg-secondary)',
-        borderBottom: '1px solid var(--border-color)',
+    <main
+      className="center-panel"
+      style={{
+        flex: 1,
+        backgroundColor: 'var(--bg-base)',
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexWrap: 'wrap',
-        gap: '0.5rem',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-          <Code2 size={16} color="var(--accent-blue)" />
-          <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-main)' }}>
-            Generated Output
-          </span>
-          <span style={{
-            fontSize: '0.7rem',
-            padding: '2px 8px',
-            borderRadius: '4px',
-            fontWeight: 600,
-            textTransform: 'uppercase',
-            backgroundColor: category === 'well-scoped' ? 'rgba(16, 185, 129, 0.15)' : category === 'underspecified' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(244, 63, 94, 0.15)',
-            color: category === 'well-scoped' ? 'var(--accent-emerald)' : category === 'underspecified' ? 'var(--accent-amber)' : 'var(--accent-rose)',
-            border: `1px solid ${category === 'well-scoped' ? 'rgba(16, 185, 129, 0.3)' : category === 'underspecified' ? 'rgba(245, 158, 11, 0.3)' : 'rgba(244, 63, 94, 0.3)'}`,
-          }}>
-            {category}
-          </span>
+        flexDirection: 'column',
+        overflow: 'hidden',
+        minWidth: 0,
+      }}
+    >
+      <div
+        style={{
+          padding: '0.65rem 1rem',
+          backgroundColor: 'var(--bg-elevated)',
+          borderBottom: '1px solid var(--border-subtle)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '0.65rem',
+          flexShrink: 0,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', minWidth: 0 }}>
+          <Code2 size={15} color="var(--text-secondary)" aria-hidden />
+          <span style={{ fontSize: '0.8125rem', fontWeight: 500 }}>Output</span>
+          {category && <span className={categoryBadgeClass(category)}>{category}</span>}
         </div>
 
-        {/* Metrics Badges */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-          <div title="Tokens (Input / Output)" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <Cpu size={13} color="var(--accent-purple)" />
-            <span>{tokensInput + tokensOutput} tokens</span>
-          </div>
-
-          <div title="Cost USD" style={{ display: 'flex', alignItems: 'center', gap: '2px', color: 'var(--accent-emerald)' }}>
-            <DollarSign size={13} />
-            <span>${costUsd?.toFixed(6)}</span>
-          </div>
-
-          <div title="Latency" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <Clock size={13} color="var(--accent-amber)" />
-            <span>{latencyMs}ms</span>
-          </div>
-
-          <button
-            onClick={handleCopy}
-            className="btn-secondary"
-            style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem' }}
-          >
-            {copied ? <Check size={13} color="var(--accent-emerald)" /> : <Copy size={13} />}
-            <span>{copied ? 'Copied' : 'Copy'}</span>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+            fontSize: '0.75rem',
+            color: 'var(--text-muted)',
+            flexWrap: 'wrap',
+          }}
+        >
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }} title="Tokens">
+            <Cpu size={12} aria-hidden />
+            {(tokensInput || 0) + (tokensOutput || 0)}
+          </span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 2 }} title="Estimated cost">
+            <DollarSign size={12} aria-hidden />
+            {formatCost(costUsd).replace('$', '')}
+          </span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }} title="Latency">
+            <Clock size={12} aria-hidden />
+            {latencyMs}ms
+          </span>
+          <button type="button" className="btn btn-secondary btn-sm" onClick={handleCopy}>
+            {copied ? <Check size={12} aria-hidden /> : <Copy size={12} aria-hidden />}
+            {copied ? 'Copied' : 'Copy'}
           </button>
         </div>
       </div>
 
-      {/* Code Content Container */}
-      <div style={{ flex: 1, overflowY: 'auto', backgroundColor: '#0d121d' }}>
+      <div style={{ flex: 1, overflowY: 'auto', backgroundColor: '#0b0b0b' }}>
         <pre className="language-javascript" style={{ margin: 0, minHeight: '100%' }}>
           <code>{generatedCode}</code>
         </pre>
       </div>
 
-      {/* Footer with SigNoz Trace Link and Feedback Signal */}
-      <div style={{
-        padding: '0.6rem 1rem',
-        backgroundColor: 'var(--bg-panel)',
-        borderTop: '1px solid var(--border-color)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        fontSize: '0.75rem',
-      }}>
-        {/* Trace ID */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)' }}>
-          <Activity size={14} color="var(--accent-purple)" />
-          <span>SigNoz Trace ID:</span>
-          <code style={{
-            background: '#0b0f19',
-            padding: '2px 6px',
-            borderRadius: '4px',
-            color: 'var(--accent-blue)',
-            fontFamily: 'var(--font-mono)',
-            fontSize: '0.75rem',
-            border: '1px solid var(--border-color)',
-          }}>
+      <div
+        style={{
+          padding: '0.65rem 1rem',
+          backgroundColor: 'var(--bg-elevated)',
+          borderTop: '1px solid var(--border-subtle)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '0.75rem',
+          fontSize: '0.75rem',
+          flexWrap: 'wrap',
+          flexShrink: 0,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)', minWidth: 0 }}>
+          <Activity size={13} aria-hidden />
+          <span className="hide-mobile">Trace</span>
+          <code
+            className="ds-mono"
+            style={{
+              background: 'var(--bg-base)',
+              padding: '2px 6px',
+              borderRadius: 4,
+              color: 'var(--text-secondary)',
+              fontSize: '0.6875rem',
+              border: '1px solid var(--border)',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              maxWidth: 180,
+            }}
+          >
             {traceId || 'N/A'}
           </code>
         </div>
 
-        {/* Feedback Signal Toggle */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-          <span style={{ color: 'var(--text-dim)' }}>Self-Learning Feedback:</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+          <span className="ds-dim hide-mobile">Feedback</span>
           <button
+            type="button"
+            className="btn btn-sm"
             onClick={() => onFeedbackToggle(historyId, true)}
-            title="Mark as successful prompt example for similarity learning"
+            title="Mark as successful for similarity learning"
             style={{
-              background: success === true ? 'rgba(16, 185, 129, 0.2)' : 'var(--bg-hover)',
-              border: `1px solid ${success === true ? 'var(--accent-emerald)' : 'var(--border-color)'}`,
-              color: success === true ? 'var(--accent-emerald)' : 'var(--text-muted)',
-              borderRadius: '4px',
-              padding: '0.3rem 0.5rem',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              fontSize: '0.75rem',
+              background: success === true ? '#ffffff' : 'transparent',
+              color: success === true ? '#0b0b0b' : 'var(--text-secondary)',
+              border: `1px solid ${success === true ? '#ffffff' : 'var(--border-strong)'}`,
             }}
           >
-            <ThumbsUp size={13} />
-            <span>Success</span>
+            <ThumbsUp size={12} aria-hidden />
+            Success
           </button>
-
           <button
+            type="button"
+            className="btn btn-sm"
             onClick={() => onFeedbackToggle(historyId, false)}
-            title="Mark as poor prompt example"
+            title="Mark as poor example"
             style={{
-              background: success === false ? 'rgba(244, 63, 94, 0.2)' : 'var(--bg-hover)',
-              border: `1px solid ${success === false ? 'var(--accent-rose)' : 'var(--border-color)'}`,
-              color: success === false ? 'var(--accent-rose)' : 'var(--text-muted)',
-              borderRadius: '4px',
-              padding: '0.3rem 0.5rem',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              fontSize: '0.75rem',
+              background: success === false ? 'var(--bg-active)' : 'transparent',
+              color: success === false ? 'var(--text-primary)' : 'var(--text-secondary)',
+              border: `1px solid ${success === false ? 'var(--border-strong)' : 'var(--border)'}`,
             }}
           >
-            <ThumbsDown size={13} />
-            <span>Needs Work</span>
+            <ThumbsDown size={12} aria-hidden />
+            Needs work
           </button>
         </div>
       </div>
