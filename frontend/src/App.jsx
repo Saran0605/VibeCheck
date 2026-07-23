@@ -8,7 +8,7 @@ import HistoryDrawer from './components/HistoryDrawer';
 import LandingPage from './components/LandingPage';
 import StatsPage from './components/StatsPage';
 
-const API_BASE = '/api';
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 export default function App() {
   const [user, setUser] = useState(null);

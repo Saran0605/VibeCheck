@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowRight, Code, ShieldCheck, Cpu, Zap, Activity } from 'lucide-react';
 
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
+
 export default function LandingPage({ user, onNavigate }) {
   const [stats, setStats] = useState({ prompts: 0, savings: 0.0 });
 
   useEffect(() => {
-    fetch('/api/public-stats')
+    fetch(`${API_BASE}/public-stats`)
       .then(res => {
         if (!res.ok) throw new Error('Rate limit or server error');
         return res.json();
