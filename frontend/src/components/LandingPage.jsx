@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowRight, Code, ShieldCheck, Cpu, Zap, Activity } from 'lucide-react';
 
-const API_BASE = import.meta.env.VITE_API_URL || '/api';
+const rawApiUrl = import.meta.env.VITE_API_URL;
+const API_BASE = rawApiUrl
+  ? (rawApiUrl.endsWith('/api') ? rawApiUrl : `${rawApiUrl}/api`)
+  : '/api';
 
 export default function LandingPage({ user, onNavigate }) {
   const [stats, setStats] = useState({ prompts: 0, savings: 0.0 });
