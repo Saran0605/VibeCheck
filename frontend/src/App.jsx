@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
-import LeftPanel from './components/LeftPanel';
 import CenterPanel from './components/CenterPanel';
 import RightPanel from './components/RightPanel';
 import AuthScreen from './components/AuthScreen';
 import OptimizeModal from './components/OptimizeModal';
 import HistoryDrawer from './components/HistoryDrawer';
+import LandingPage from './components/LandingPage';
+import StatsPage from './components/StatsPage';
 
 const API_BASE = '/api';
 
@@ -15,6 +16,7 @@ export default function App() {
   const [historyOpen, setHistoryOpen] = useState(false);
   const [optimizeModalOpen, setOptimizeModalOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [currentView, setCurrentView] = useState('landing');
 
   // Prompt state
   const [promptText, setPromptText] = useState('');
@@ -34,6 +36,12 @@ export default function App() {
   useEffect(() => {
     fetchMe();
   }, []);
+
+  useEffect(() => {
+    if (!authChecking && !user && currentView !== 'landing' && currentView !== 'auth') {
+      setCurrentView('landing');
+    }
+  }, [user, authChecking, currentView]);
 
   const fetchMe = async () => {
     try {
@@ -247,37 +255,60 @@ export default function App() {
     );
   }
 
-  if (!user) {
-    return <AuthScreen onLogin={handleLogin} onSignup={handleSignup} />;
-  }
+  // If user is not logged in, we only allow 'landing' or 'auth' views
+  const effectiveView = (!user && currentView !== 'auth') ? 'landing' : currentView;
 
   return (
-    <div className="app-shell">
+    <div className="app-shell" style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
       <Navbar
         user={user}
+        currentView={effectiveView}
+        onNavigate={setCurrentView}
         onOpenHistory={() => {
           fetchHistory();
           setHistoryOpen(true);
         }}
         onLogout={handleLogout}
-        onToggleSidebar={() => setSidebarOpen((v) => !v)}
+        onToggleSidebar={null}
       />
 
-      <div className="app-body">
-        <LeftPanel mobileOpen={sidebarOpen} onCloseMobile={() => setSidebarOpen(false)} />
+      {effectiveView === 'landing' && (
+        <LandingPage user={user} onNavigate={setCurrentView} />
+      )}
 
-        <CenterPanel currentOutput={currentOutput} onFeedbackToggle={handleFeedbackToggle} />
-
-        <RightPanel
-          promptText={promptText}
-          setPromptText={setPromptText}
-          onOpenOptimizeModal={handleOpenOptimizeModal}
-          onSubmitPrompt={handleSubmitPrompt}
-          promptifyLoading={promptifyLoading}
-          generateLoading={generateLoading}
-          promptCategory={promptCategory}
+      {effectiveView === 'auth' && (
+        <AuthScreen
+          onLogin={async (email, password) => {
+            await handleLogin(email, password);
+            setCurrentView('workspace');
+          }}
+          onSignup={async (email, password) => {
+            await handleSignup(email, password);
+            setCurrentView('workspace');
+          }}
+          onCancel={() => setCurrentView('landing')}
         />
-      </div>
+      )}
+
+      {effectiveView === 'workspace' && user && (
+        <div className="app-body" style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+          <CenterPanel currentOutput={currentOutput} onFeedbackToggle={handleFeedbackToggle} />
+
+          <RightPanel
+            promptText={promptText}
+            setPromptText={setPromptText}
+            onOpenOptimizeModal={handleOpenOptimizeModal}
+            onSubmitPrompt={handleSubmitPrompt}
+            promptifyLoading={promptifyLoading}
+            generateLoading={generateLoading}
+            promptCategory={promptCategory}
+          />
+        </div>
+      )}
+
+      {effectiveView === 'stats' && user && (
+        <StatsPage user={user} />
+      )}
 
       <OptimizeModal
         isOpen={optimizeModalOpen}

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Mail, Lock, LogIn, UserPlus, Shield } from 'lucide-react';
+import GrayscaleWaves from './GrayscaleWaves';
 
-export default function AuthScreen({ onLogin, onSignup }) {
+export default function AuthScreen({ onLogin, onSignup, onCancel }) {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -53,21 +54,53 @@ export default function AuthScreen({ onLogin, onSignup }) {
     <div
       className="ds-page animate-fade-in"
       style={{
+        position: 'relative',
         minHeight: '100vh',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         padding: '1.5rem',
+        background: '#000000',
+        overflow: 'hidden',
       }}
     >
+      {/* Background waves animation */}
+      <GrayscaleWaves />
+
       <div
         className="ds-card animate-slide-up"
         style={{
+          position: 'relative',
+          zIndex: 10,
           width: '100%',
           maxWidth: 400,
           padding: '2rem',
+          background: 'rgba(10, 10, 10, 0.8)',
+          backdropFilter: 'blur(12px)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
         }}
       >
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: 'var(--text-muted)',
+              fontSize: '0.75rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4,
+              marginBottom: '1rem',
+              padding: 0,
+            }}
+          >
+            ← Back to Home
+          </button>
+        )}
+
         <div style={{ marginBottom: '1.75rem' }}>
           <div
             style={{
@@ -111,8 +144,8 @@ export default function AuthScreen({ onLogin, onSignup }) {
             gridTemplateColumns: '1fr 1fr',
             gap: 4,
             padding: 4,
-            background: 'var(--bg-base)',
-            border: '1px solid var(--border)',
+            background: 'rgba(255, 255, 255, 0.02)',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
             borderRadius: 'var(--radius-md)',
             marginBottom: '1.5rem',
           }}
@@ -137,8 +170,8 @@ export default function AuthScreen({ onLogin, onSignup }) {
                 fontSize: '0.8125rem',
                 fontWeight: 500,
                 cursor: 'pointer',
-                background: isLogin === tab.key ? 'var(--bg-surface)' : 'transparent',
-                color: isLogin === tab.key ? 'var(--text-primary)' : 'var(--text-muted)',
+                background: isLogin === tab.key ? '#ffffff' : 'transparent',
+                color: isLogin === tab.key ? '#000000' : 'var(--text-muted)',
                 boxShadow: isLogin === tab.key ? 'var(--shadow-sm)' : 'none',
                 transition: 'all var(--transition)',
               }}
@@ -192,6 +225,10 @@ export default function AuthScreen({ onLogin, onSignup }) {
                 placeholder="you@company.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.02)',
+                  borderColor: 'rgba(255, 255, 255, 0.1)',
+                }}
               />
             </div>
           </div>
@@ -222,6 +259,10 @@ export default function AuthScreen({ onLogin, onSignup }) {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.02)',
+                  borderColor: 'rgba(255, 255, 255, 0.1)',
+                }}
               />
             </div>
           </div>
@@ -251,11 +292,11 @@ export default function AuthScreen({ onLogin, onSignup }) {
             margin: '1.25rem 0',
           }}
         >
-          <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
+          <div style={{ flex: 1, height: 1, background: 'rgba(255, 255, 255, 0.08)' }} />
           <span className="ds-dim" style={{ fontSize: '0.6875rem', letterSpacing: '0.06em' }}>
             OR
           </span>
-          <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
+          <div style={{ flex: 1, height: 1, background: 'rgba(255, 255, 255, 0.08)' }} />
         </div>
 
         <button
@@ -263,6 +304,9 @@ export default function AuthScreen({ onLogin, onSignup }) {
           className="btn btn-secondary btn-block btn-lg"
           onClick={handleGoogleSignIn}
           disabled={loading}
+          style={{
+            borderColor: 'rgba(255, 255, 255, 0.15)',
+          }}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden>
             <path
