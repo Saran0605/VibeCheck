@@ -183,4 +183,4 @@ Given the hackathon's time constraints, we made conscious scope decisions rather
 - Team/workspace support for shared prompt history and cost accountability
 - Expand the classifier from heuristic rules to a lightweight trained model once enough real usage data has accumulated
 
-*This README is intended as the first document a judge reads. For the full development journey — problem discovery, design decisions, and what we learned along the way — see our [Medium write-up](#).*
+
